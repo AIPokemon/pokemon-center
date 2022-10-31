@@ -1,0 +1,27 @@
+{
+  "name": "pokemon-center",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AIPokemon/pokemon-center.git"
+  },
+  "author": "Hata",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AIPokemon/pokemon-center/issues"
+  },
+  "homepage": "https://github.com/AIPokemon/pokemon-center#readme",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.1.0",
+    "@grpc/proto-loader": "^0.7.0",
+    "async": "^1.5.2",
+    "google-protobuf": "^3.0.0",
+    "lodash": "^4.6.1",
+    "minimist": "^1.2.0"
+  }
+}

@@ -1,0 +1,19 @@
+{
+    "modules": {
+        "pokedex": {
+            "rpcServer": "default",
+            "protoFiles": "../pokemon-rpc/pokedex",
+            "serviceName": "Pokedex",
+            "controller": "./pokedex/controller"
+        }
+    },
+    "rpcServers": {
+        "default": {
+            "port": "0.0.0.0:6878"
+        },
+        "pokedex": {
+            "inuse": 0,
+            "port": "0.0.0.0:6879"
+        }
+    }
+}
