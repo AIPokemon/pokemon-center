@@ -2,7 +2,7 @@
  * @Author:  Hata
  * @Date: 2022-10-30 19:25:21
  * @LastEditors: Hata
- * @LastEditTime: 2022-10-31 23:44:30
+ * @LastEditTime: 2022-11-01 22:49:20
  * @FilePath: \pokemon-center\common\grpc.js
  * @Description:
  */
@@ -33,7 +33,6 @@ exports.start = function (server, port) {
       if (err) {
         throw err;
       } else {
-        console.log(server);
         server.start();
       }
     }

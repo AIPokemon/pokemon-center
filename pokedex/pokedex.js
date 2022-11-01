@@ -2,7 +2,7 @@
  * @Author:  Hata
  * @Date: 2022-10-30 18:31:59
  * @LastEditors: Hata
- * @LastEditTime: 2022-10-31 23:43:20
+ * @LastEditTime: 2022-11-01 23:58:41
  * @FilePath: \pokemon-center\pokedex\pokedex.js
  * @Description:
  */
@@ -11,20 +11,27 @@ const errors = require("./errors");
 const { Pokedex } = require("../../pokemon-showdown/.data-dist/pokedex");
 const { Abilities } = require("../../pokemon-showdown/.data-dist/abilities");
 
+const convertIgnore = ["s", "%", "-"];
+const ignoreRegExp = (() => {
+  const exp = convertIgnore.join("+|");
+  return new RegExp(exp, "g");
+})();
+
 function convertName(name) {
   name = name.toLowerCase();
-  name = name.replace(/(\s*)/g, "");
+  name = name.replace(ignoreRegExp, "");
   return name;
 }
 
-function buildProperty(base, table, convertFunc = undefined) {
-  const result = {};
-  for (key in base) {
-    const convertKey = table[key] ?? undefined;
+function buildProperty(result, origin, key_mapping, convertFunc = undefined) {
+  for (key in origin) {
+    const convertKey = key_mapping[key] ?? undefined;
     if (convertKey !== undefined) {
-      let val = base[key];
+      let val = origin[key];
       if (convertFunc !== undefined) {
-        val = convertFunc(val);
+        try {
+          val = convertFunc(val);
+        } catch {}
       }
       result[convertKey] = val;
     }
@@ -34,20 +41,13 @@ function buildProperty(base, table, convertFunc = undefined) {
 }
 
 function parseAbility(id, ability) {
-  const result = {
-    id: id,
-    num: ability.num,
-    name: ability.name,
-    rating: ability.rating,
-  };
-
-  return result;
+  return id;
 }
 
 function getAbilityById(id) {
   const ability = Abilities[id] ?? undefined;
   if (ability === undefined) {
-    throw new errors.DexResourceError("ability", { id: id });
+    throw new errors.DexAbilityError({ id: id });
   }
 
   return parseAbility(id, ability);
@@ -58,7 +58,7 @@ function getAbilityByName(name) {
     const id = convertName(name);
     return getAbilityById(id);
   } catch (err) {
-    if (err instanceof errors.DexResourceError) {
+    if (err instanceof errors.DexAbilityError) {
       for (const id in Abilities) {
         const ability = Abilities[id];
         if (ability.name === name) {
@@ -70,19 +70,20 @@ function getAbilityByName(name) {
     }
   }
 
-  throw new errors.DexResourceError("ability", { name: name });
+  throw new errors.DexAbilityError({ name: name });
 }
 
 function parsePokemon(id, pm) {
   const abilities = buildProperty(
+    {},
     pm.abilities,
     { 0: "first", 1: "second", H: "hidden" },
     getAbilityByName
   );
 
-  const types = buildProperty(pm.types, { 0: "first", 1: "second" });
+  const types = buildProperty({}, pm.types, { 0: "first", 1: "second" });
 
-  const result = {
+  let result = {
     id: id,
     num: pm.num,
     name: pm.name,
@@ -93,28 +94,31 @@ function parsePokemon(id, pm) {
     weight: pm.weightkg,
   };
 
-  if ("prevo" in pm) {
-    result.prevoId = getPokemonByName(pm.prevo).id;
-  }
+  result = buildProperty(
+    result,
+    pm,
+    { prevo: "prevoId" },
+    (val) => getPokemonByName(val).id
+  );
 
   return result;
 }
 
-module.exports.getPokemonById = function getPokemonById(id) {
+function getPokemonById(id) {
   const pokemon = Pokedex[id] ?? undefined;
   if (pokemon === undefined) {
-    throw new errors.DexResourceError("pokemon", { id: id });
+    throw new errors.DexPokemonError({ id: id });
   }
 
   return parsePokemon(id, pokemon);
-};
+}
 
-module.exports.getPokemonByName = function getPokemonByName(name) {
+function getPokemonByName(name) {
   try {
     const id = convertName(name);
     return getPokemonById(id);
   } catch (err) {
-    if (err instanceof errors.DexResourceError) {
+    if (err instanceof errors.DexPokemonError) {
       for (const id in Pokedex) {
         const pokemon = Pokedex[id];
         if (pokemon.name === name) {
@@ -126,5 +130,8 @@ module.exports.getPokemonByName = function getPokemonByName(name) {
     }
   }
 
-  throw new errors.DexResourceError("pokemon", { name: name });
-};
+  throw new errors.DexPokemonError({ name: name });
+}
+
+module.exports.getPokemonByName = getPokemonByName;
+module.exports.getPokemonById = getPokemonById;

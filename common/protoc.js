@@ -1,6 +1,15 @@
+/*
+ * @Author:  Hata
+ * @Date: 2022-10-30 18:55:39
+ * @LastEditors: Hata
+ * @LastEditTime: 2022-11-01 22:49:08
+ * @FilePath: \pokemon-center\common\protoc.js
+ * @Description: 
+ */
 const fs = require("fs");
 const path = require("path");
 const protoLoader = require("@grpc/proto-loader");
+const extend = require('node.extend');
 
 const defaultOptions = {
   keepCase: true,
@@ -30,5 +39,5 @@ exports.loadPachage = function (packagePath, options = defaultOptions) {
 };
 
 exports.defaultOptions = function () {
-  return defaultOptions;
+  return extend({}, defaultOptions);
 };
