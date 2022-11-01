@@ -17,11 +17,7 @@
   },
   "homepage": "https://github.com/AIPokemon/pokemon-center#readme",
   "dependencies": {
-    "@grpc/grpc-js": "^1.1.0",
-    "@grpc/proto-loader": "^0.7.0",
-    "async": "^1.5.2",
-    "google-protobuf": "^3.0.0",
-    "lodash": "^4.6.1",
-    "minimist": "^1.2.0"
+    "@grpc/grpc-js": "^1.7.3",
+    "@grpc/proto-loader": "^0.7.0"
   }
 }
