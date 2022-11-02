@@ -2,7 +2,7 @@
  * @Author:  Hata
  * @Date: 2022-10-30 18:31:59
  * @LastEditors: Hata
- * @LastEditTime: 2022-11-02 17:33:14
+ * @LastEditTime: 2022-11-02 23:01:47
  * @FilePath: \pokemon-center\pokedex\pokedex.js
  * @Description:
  */
@@ -11,7 +11,18 @@ const errors = require("./errors");
 const { Pokedex } = require("../../pokemon-showdown/.data-dist/pokedex");
 const { Abilities } = require("../../pokemon-showdown/.data-dist/abilities");
 
-const convertIgnore = ["\\s", "%", "-", ":", ".", ",", "’", "'", "\\(", "\\)"];
+const convertIgnore = [
+  "\\s",
+  "%",
+  "-",
+  ":",
+  "\\.",
+  ",",
+  "’",
+  "\\(",
+  "\\)",
+  "'",
+];
 
 const ignoreRegExp = (() => {
   const exp = convertIgnore.join("+|") + "+";
@@ -98,8 +109,8 @@ function parsePokemon(id, pm) {
     baseStats: pm.baseStats,
     types: types,
     abilities: abilities,
-    height: pm.heightm,
-    weight: pm.weightkg,
+    height: Math.floor(pm.heightm * 100),
+    weight: Math.floor(pm.weightkg * 100),
   };
 
   result = buildProperty(
@@ -152,11 +163,61 @@ function getPokemonByNum(num) {
   throw new errors.DexPokemonError({ num: num });
 }
 
-function* listPokemon(num, name, type, ability, prevoId) {
+const fliterTable = {
+  name: (pm, name) => pm.name.includes(name),
+  num: (pm, num) => pm.num === num,
+  types: (pm, types) => {
+    if (types.first !== undefined && !pm.types.includes(types.first)) {
+      return false;
+    }
+    if (types.second !== undefined && !pm.types.includes(types.second)) {
+      return false;
+    }
+    return true;
+  },
+  abilities: (pm, abilities) => {
+    for (const ability of pm.abilities) {
+      if (ability === abilities[0] ?? undefined) {
+        return true;
+      }
+      if (ability === abilities[1] ?? undefined) {
+        return true;
+      }
+      if (ability === abilities["H"] ?? undefined) {
+        return true;
+      }
+    }
+    return false;
+  },
+};
+
+function listPokemonFliter(pm, query) {
+  for (let condition in query) {
+    const val = query[condition];
+    if (val == undefined) {
+      continue;
+    }
+
+    if (condition in fliterTable) {
+      const callback = fliterTable[condition];
+      if (!callback(pm, val)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+function listPokemon(query) {
+  const result = [];
   for (const id in Pokedex) {
     const pm = Pokedex[id];
-    yield parsePokemon(id, pm);
+    if (listPokemonFliter(pm, query)) {
+      result.push(parsePokemon(id, pm));
+    }
   }
+  return result;
 }
 
 module.exports.getPokemonByName = getPokemonByName;

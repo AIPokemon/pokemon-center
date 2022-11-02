@@ -2,7 +2,7 @@
  * @Author:  Hata
  * @Date: 2022-10-30 22:00:47
  * @LastEditors: Hata
- * @LastEditTime: 2022-11-02 16:37:29
+ * @LastEditTime: 2022-11-02 23:20:11
  * @FilePath: \pokemon-center\pokedex\controller.js
  * @Description:
  */
@@ -27,10 +27,12 @@ module.exports.getPokemon = (call, callback) => {
   callback(undefined, { result: pm });
 };
 
-module.exports.listPokemon = (call) => {
-  const req = call.request;
-  for (const pm of pokedex.listPokemon()) {
-    call.write(pm);
+module.exports.listPokemon = (call, callback) => {
+  let result = undefined;
+  try {
+    result = pokedex.listPokemon(call.request);
+  } catch (error) {
+    callback(error, undefined);
   }
-  call.end();
+  callback(undefined, { result: result });
 };
