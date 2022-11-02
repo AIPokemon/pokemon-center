@@ -2,7 +2,7 @@
  * @Author:  Hata
  * @Date: 2022-10-30 18:31:59
  * @LastEditors: Hata
- * @LastEditTime: 2022-11-01 23:58:41
+ * @LastEditTime: 2022-11-02 17:33:14
  * @FilePath: \pokemon-center\pokedex\pokedex.js
  * @Description:
  */
@@ -11,9 +11,10 @@ const errors = require("./errors");
 const { Pokedex } = require("../../pokemon-showdown/.data-dist/pokedex");
 const { Abilities } = require("../../pokemon-showdown/.data-dist/abilities");
 
-const convertIgnore = ["s", "%", "-"];
+const convertIgnore = ["\\s", "%", "-", ":", ".", ",", "’", "'", "\\(", "\\)"];
+
 const ignoreRegExp = (() => {
-  const exp = convertIgnore.join("+|");
+  const exp = convertIgnore.join("+|") + "+";
   return new RegExp(exp, "g");
 })();
 
@@ -41,7 +42,13 @@ function buildProperty(result, origin, key_mapping, convertFunc = undefined) {
 }
 
 function parseAbility(id, ability) {
-  return id;
+  const result = {
+    id: id,
+    num: ability.num,
+    name: ability.name,
+    rating: ability.rating,
+  };
+  return result;
 }
 
 function getAbilityById(id) {
@@ -59,6 +66,7 @@ function getAbilityByName(name) {
     return getAbilityById(id);
   } catch (err) {
     if (err instanceof errors.DexAbilityError) {
+      console.log(`try get ${name}, real get.`);
       for (const id in Abilities) {
         const ability = Abilities[id];
         if (ability.name === name) {
@@ -78,7 +86,7 @@ function parsePokemon(id, pm) {
     {},
     pm.abilities,
     { 0: "first", 1: "second", H: "hidden" },
-    getAbilityByName
+    (ability) => getAbilityByName(ability).id
   );
 
   const types = buildProperty({}, pm.types, { 0: "first", 1: "second" });
@@ -98,7 +106,7 @@ function parsePokemon(id, pm) {
     result,
     pm,
     { prevo: "prevoId" },
-    (val) => getPokemonByName(val).id
+    (prevoName) => getPokemonByName(prevoName).id
   );
 
   return result;
@@ -119,6 +127,7 @@ function getPokemonByName(name) {
     return getPokemonById(id);
   } catch (err) {
     if (err instanceof errors.DexPokemonError) {
+      console.log(`try get ${name}, real get.`);
       for (const id in Pokedex) {
         const pokemon = Pokedex[id];
         if (pokemon.name === name) {
@@ -133,5 +142,24 @@ function getPokemonByName(name) {
   throw new errors.DexPokemonError({ name: name });
 }
 
+function getPokemonByNum(num) {
+  for (const id in Pokedex) {
+    const pokemon = Pokedex[id];
+    if (pokemon.num === num) {
+      return parsePokemon(id, pokemon);
+    }
+  }
+  throw new errors.DexPokemonError({ num: num });
+}
+
+function* listPokemon(num, name, type, ability, prevoId) {
+  for (const id in Pokedex) {
+    const pm = Pokedex[id];
+    yield parsePokemon(id, pm);
+  }
+}
+
 module.exports.getPokemonByName = getPokemonByName;
 module.exports.getPokemonById = getPokemonById;
+module.exports.getPokemonByNum = getPokemonByNum;
+module.exports.listPokemon = listPokemon;
