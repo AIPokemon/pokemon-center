@@ -2,7 +2,7 @@
  * @Author:  Hata
  * @Date: 2022-10-30 22:00:47
  * @LastEditors: Hata
- * @LastEditTime: 2022-11-02 23:20:11
+ * @LastEditTime: 2022-11-03 11:20:13
  * @FilePath: \pokemon-center\pokedex\controller.js
  * @Description:
  */
@@ -21,7 +21,7 @@ module.exports.getPokemon = (call, callback) => {
       pm = pokedex.getPokemonByNum(req.num);
     }
   } catch (error) {
-    callback(error, { result: pm });
+    callback(error, undefined);
   }
 
   callback(undefined, { result: pm });

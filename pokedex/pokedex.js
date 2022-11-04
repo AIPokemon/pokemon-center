@@ -2,7 +2,7 @@
  * @Author:  Hata
  * @Date: 2022-10-30 18:31:59
  * @LastEditors: Hata
- * @LastEditTime: 2022-11-02 23:01:47
+ * @LastEditTime: 2022-11-03 16:41:14
  * @FilePath: \pokemon-center\pokedex\pokedex.js
  * @Description:
  */
@@ -176,18 +176,17 @@ const fliterTable = {
     return true;
   },
   abilities: (pm, abilities) => {
-    for (const ability of pm.abilities) {
-      if (ability === abilities[0] ?? undefined) {
-        return true;
-      }
-      if (ability === abilities[1] ?? undefined) {
-        return true;
-      }
-      if (ability === abilities["H"] ?? undefined) {
-        return true;
+    const includes = (ability) =>
+      ability === pm.abilities[0] ||
+      ability === pm.abilities[1] ||
+      ability === pm.abilities["H"];
+
+    for (const ability of abilities) {
+      if (ability !== undefined && !includes(ability)) {
+        return false;
       }
     }
-    return false;
+    return true;
   },
 };
 
@@ -220,7 +219,9 @@ function listPokemon(query) {
   return result;
 }
 
-module.exports.getPokemonByName = getPokemonByName;
-module.exports.getPokemonById = getPokemonById;
-module.exports.getPokemonByNum = getPokemonByNum;
-module.exports.listPokemon = listPokemon;
+module.exports = {
+  getPokemonByName: getPokemonByName,
+  getPokemonById: getPokemonById,
+  getPokemonByNum: getPokemonByNum,
+  listPokemon: listPokemon,
+};
